@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式教學資源中心</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- 
+    Chosen Palette: Serene Professional (Light Gray background, Slate for text, with Teal as a primary accent)
+    Application Structure Plan: A single-page application (SPA) designed as a "Learning Portal". The initial view is a main hub with a hero section and a grid of "tool cards". Clicking a tool card (e.g., "SoundWave Explorer") dynamically hides the hub view and injects the selected tool's full HTML and initializes its specific JS logic into a dedicated container. A "back" button allows users to return to the main hub. This structure is highly scalable for future content (like the "RUL404" placeholder) and provides a seamless, professional user experience without page reloads, making it ideal for a cohesive teaching platform.
+    Visualization & Content Choices: 
+    - Report Info: The entire "soundwave-interactive-explorer" artifact.
+    - Goal: Integrate a complete, pre-existing interactive application into a new, larger portal structure.
+    - Viz/Presentation Method: 
+        1. Main Portal: Card-based layout (HTML/Tailwind) to represent available tools.
+        2. Tool Loading: A container div (`<div id="tool-container">`) is populated with the selected tool's HTML via a JavaScript template literal.
+    - Interaction: Clicking a card triggers a view change. The JS logic for the loaded tool is then executed to make it interactive.
+    - Justification: This approach reuses existing complex interactive content within a new, scalable framework. It treats entire applications as "modules" that can be plugged into the main portal, which is a robust and user-friendly architecture for an expanding educational toolkit.
+    - Library/Method: Vanilla JS for view management and dynamic content injection. The embedded tool uses Chart.js as per its original design.
+    CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #F9FAFB;
+        }
+        .tool-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        #tool-view {
+            display: none;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- Main Portal View -->
+    <div id="main-portal">
+        <header class="bg-white">
+            <div class="container mx-auto px-6 py-12 text-center">
+                <h1 class="text-4xl md:text-5xl font-bold text-slate-900">互動式教學資源中心</h1>
+                <p class="mt-4 text-lg text-slate-600 max-w-2xl mx-auto">一個專為提升溝通與認知技巧而設計的學習平台。探索我們的工具，開啟您的學習之旅。</p>
+            </div>
+        </header>
+
+        <main class="container mx-auto px-6 py-16">
+            <h2 class="text-3xl font-bold text-center mb-12">可用工具</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                
+                <!-- SoundWave Tool Card -->
+                <div id="launch-soundwave" class="tool-card bg-white rounded-xl shadow-md overflow-hidden cursor-pointer">
+                    <div class="p-8">
+                        <div class="flex items-center mb-4">
+                            <div class="p-3 rounded-full bg-teal-100 mr-4">
+                                <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.636 5.636a9 9 0 0112.728 0m-9.9-2.828a5 5 0 017.072 0"></path></svg>
+                            </div>
+                            <h3 class="text-2xl font-bold text-slate-900">SoundWave</h3>
+                        </div>
+                        <p class="text-slate-600">一個互動式探索工具，幫助您深入理解 SoundWave 溝通模型中的九種聲音與三大核心模組。</p>
+                        <button class="mt-6 w-full bg-teal-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors">
+                            啟動工具
+                        </button>
+                    </div>
+                </div>
+
+                <!-- RUL404 Placeholder Card -->
+                <div class="tool-card bg-white rounded-xl shadow-md overflow-hidden opacity-60">
+                     <div class="p-8">
+                        <div class="flex items-center mb-4">
+                            <div class="p-3 rounded-full bg-slate-100 mr-4">
+                                <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.546-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <h3 class="text-2xl font-bold text-slate-900">RUL404 模組</h3>
+                        </div>
+                        <p class="text-slate-500">更多精彩的互動學習工具正在開發中，將幫助您探索更多元的議題與知識領域。</p>
+                        <button class="mt-6 w-full bg-slate-300 text-slate-500 font-bold py-2 px-4 rounded-lg cursor-not-allowed">
+                            敬請期待
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Tool View (Initially Hidden) -->
+    <div id="tool-view">
+        <nav class="bg-white shadow-sm sticky top-0 z-50">
+            <div class="container mx-auto px-6 py-3 flex justify-between items-center">
+                <h2 id="tool-title" class="text-xl font-bold text-slate-800"></h2>
+                <button id="back-to-portal" class="bg-teal-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors">
+                    返回主頁
+                </button>
+            </div>
+        </nav>
+        <div id="tool-container" class="p-2 md:p-4">
+            <!-- The selected tool's HTML will be injected here -->
+        </div>
+    </div>
+    
+    <footer class="text-center py-8 text-slate-500">
+        <p>&copy; 2025 互動式教學資源中心. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const mainPortal = document.getElementById('main-portal');
+            const toolView = document.getElementById('tool-view');
+            const toolContainer = document.getElementById('tool-container');
+            const toolTitle = document.getElementById('tool-title');
+
+            const launchSoundwaveBtn = document.getElementById('launch-soundwave');
+            const backToPortalBtn = document.getElementById('back-to-portal');
+            
+            // --- Templates for tools ---
+
+            const soundwaveToolHTML = `
+                <div id="soundwave-root" class="w-full h-full">
+                    <header class="text-center mb-10">
+                        <h1 class="text-4xl md:text-5xl font-bold text-gray-800">SoundWave 互動式探索工具</h1>
+                        <p class="mt-2 text-lg text-gray-500">以精湛的對話驅動影響力</p>
+                    </header>
+                    <main>
+                        <div id="module-nav" class="flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-4 mb-8"></div>
+                        <div class="lg:grid lg:grid-cols-12 lg:gap-8">
+                            <div class="lg:col-span-4 mb-8 lg:mb-0">
+                                <h2 id="voice-section-title" class="text-2xl font-bold mb-4 text-gray-700"></h2>
+                                <div id="voice-cards-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4"></div>
+                            </div>
+                            <div class="lg:col-span-8">
+                                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8 sticky top-24">
+                                    <div id="content-panel" class="mb-8" style="transition: opacity 0.4s ease-in-out;"></div>
+                                    <div>
+                                        <h3 class="text-xl font-semibold text-center mb-4 text-gray-700">聲音特質分析</h3>
+                                        <div style="position: relative; width: 100%; max-width: 450px; margin-left: auto; margin-right: auto; height: 300px; max-height: 400px;">
+                                            <canvas id="voiceChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>`;
+            
+            function initSoundWaveTool() {
+                const soundWaveData = {
+                    modules: [
+                        { id: 'ask', name: '提問 (Ask)', description: '為了去理解、投入與發現。', color: '#34D399' },
+                        { id: 'suggest', name: '提議 (Suggest)', description: '為了去影響、吸引與描述。', color: '#FBBF24' },
+                        { id: 'tell', name: '提醒 (Tell)', description: '為了去塑造、指導與突破。', color: '#60A5FA' },
+                    ],
+                    voices: [
+                        { id: 'inquire', moduleId: 'ask', name: '探詢 (Inquire)', title: '給予關注的智慧', core: '探詢的智慧在於超越顯而易見的事物，提出開放性問題以持續探索。', functions: ['開啟對話', '引導對話走向理解', '建立連結'], examples: ['嗨，你好嗎？', '你的那個專案進行得如何？', '你認為你最好的選擇是什麼？'], profile: { '探索性': 5, '指導性': 1, '建設性': 4, '影響性': 2, '突破性': 1 } },
+                        { id: 'probe', moduleId: 'ask', name: '深究 (Probe)', title: '發掘真相的智慧',core: '「深究」聲音能讓我們將對話超越表面。', functions: ['鼓勵更深層的反思', '徹底地探討議題', '建設性地回應困惑或模糊之處'], examples: ['你為什麼認為會這樣？', '多告訴我一些那方面的事。', '請解釋一下你的意思。'], profile: { '探索性': 5, '指導性': 2, '建設性': 5, '影響性': 2, '突破性': 2 } },
+                        { id: 'diagnose', moduleId: 'ask', name: '診斷 (Diagnose)', title: '定義問題的智慧',core: '「診斷」是為了尋求解決方案！透過提問來定義問題。', functions: ['找到問題的根源', '產生連貫且透徹的解釋', '以適應和發展思維的方式應對挑戰'], examples: ['如果你對此說「是」，那你是在對什麼說「不」？', '當它壞掉時，你看到和聽到了什麼？', '我們能做些什麼來改進？'], profile: { '探索性': 4, '指導性': 3, '建設性': 5, '影響性': 1, '突破性': 2 } },
+                        { id: 'articulate', moduleId: 'suggest', name: '表述 (Articulate)', title: '講述故事的智慧', core: '它具有一種悄然的影響力，是能夠吸引、捕捉並迷惑人心的聲音。', functions: ['捕捉正在發生事情的精髓', '創建一個建立關係的中性平台', '抓住注意力並獲得影響力'], examples: ['總結來說，我聽到的是...', '所以我試圖要說的是...', '根據數據...'], profile: { '探索性': 2, '指導性': 2, '建設性': 4, '影響性': 4, '突破性': 1 } },
+                        { id: 'advocate', moduleId: 'suggest', name: '倡導 (Advocate)', title: '訴諸理智與情感的智慧', core: '「倡導」聲音被用來放大我們的訊息，提供信念、強力激勵他人。', functions: ['倡導一個新的視角', '說服他人接受一個觀點或決定', '激勵他人'], examples: ['為了進步，我們需要堅持更高的標準。', '我真的認為這樣做更好，原因如下...', '這看起來很棒！'], profile: { '探索性': 1, '指導性': 3, '建設性': 2, '影響性': 5, '突破性': 3 } },
+                        { id: 'advise', moduleId: 'suggest', name: '建議 (Advise)', title: '贈予答案的智慧', core: '「建議」的目標很簡單：透過提供深思熟慮的答案來服務他人。', functions: ['讓他人安心', '表達並邀請他人的融洽關係', '建立信譽'], examples: ['我比較了這些選項...', '根據我的經驗，我認為你應該...', '如果我處在你的位置，我會這麼做...'], profile: { '探索性': 1, '指導性': 4, '建設性': 3, '影響性': 4, '突破性': 1 } },
+                        { id: 'critique', moduleId: 'tell', name: '評論 (Critique)', title: '剖析的智慧', core: '「評論」透過評估一個想法或論點中的優缺點來增進理解。', functions: ['審查想法或觀點', '驅動反思與責任感', '表達一個可靠的行動原則或標準'], examples: ['一方面...但另一方面...', '這個計畫的優點和缺點將會是...', '我喜歡新功能，但如果...'], profile: { '探索性': 2, '指導性': 3, '建設性': 5, '影響性': 2, '突破性': 3 } },
+                        { id: 'correct', moduleId: 'tell', name: '糾正 (Correct)', title: '管理界線的智慧', core: '「糾正」聲音是一個堅定的嚮導，告訴我們哪裡出錯了，要求遵守、劃定界線。', functions: ['維持標準或期望', '保持事情在掌控之中', '確保貫徹執行與連續性'], examples: ['我看到你是這樣做的，但這才是應該的做法。', '你應該改做這個...', '請將此更改為...'], profile: { '探索性': 1, '指導性': 5, '建設性': 3, '影響性': 2, '突破性': 4 } },
+                        { id: 'challenge', moduleId: 'tell', name: '挑戰 (Challenge)', title: '突破的智慧', core: '「挑戰」聲音超越了反對。它是關於突破，讓人們停下來思考「為什麼」。', functions: ['改變焦點或方向', '指出想法中的限制或假設', '激發改變'], examples: ['我們為什麼不改用這種方式做呢？', '我不同意！', '絕對有更好的方法可以做到這一點。'], profile: { '探索性': 2, '指導性': 4, '建設性': 2, '影響性': 3, '突破性': 5 } }
+                    ]
+                };
+                const root = document.getElementById('soundwave-root');
+                const moduleNav = root.querySelector('#module-nav');
+                const voiceCardsContainer = root.querySelector('#voice-cards-container');
+                const contentPanel = root.querySelector('#content-panel');
+                const voiceSectionTitle = root.querySelector('#voice-section-title');
+                
+                let currentModuleId = 'ask';
+                let currentVoiceId = 'inquire';
+                let chart;
+                
+                function renderModuleTabs() {
+                    moduleNav.innerHTML = soundWaveData.modules.map(module => `
+                        <button data-id="${module.id}" class="module-tab w-full sm:w-auto text-lg font-bold py-3 px-6 rounded-lg transition-all ${module.id === currentModuleId ? `bg-[${module.color}] text-white` : 'bg-white hover:bg-gray-100'}">
+                            ${module.name}
+                        </button>
+                    `).join('');
+                }
+
+                function renderVoiceCards(moduleId) {
+                    const voices = soundWaveData.voices.filter(v => v.moduleId === moduleId);
+                    const moduleColor = soundWaveData.modules.find(m => m.id === moduleId).color;
+                    voiceCardsContainer.innerHTML = voices.map(voice => `
+                        <div data-id="${voice.id}" class="voice-card bg-white p-5 rounded-xl border-2 shadow-md cursor-pointer ${voice.id === currentVoiceId ? `border-[${moduleColor}]` : 'border-transparent'} hover:shadow-xl">
+                            <h3 class="font-bold text-lg text-gray-800">${voice.name}</h3>
+                            <p class="text-sm text-gray-500">${voice.title}</p>
+                        </div>
+                    `).join('');
+                }
+
+                function renderContent(voiceId) {
+                    const voice = soundWaveData.voices.find(v => v.id === voiceId);
+                    if (!voice) return;
+
+                    contentPanel.style.opacity = 0;
+                    setTimeout(() => {
+                        contentPanel.innerHTML = `
+                            <h2 class="text-3xl font-bold text-gray-800 mb-2">${voice.name}</h2>
+                            <p class="text-lg text-gray-500 font-semibold mb-4">${voice.title}</p>
+                            <p class="text-base text-gray-600 leading-relaxed mb-6">${voice.core}</p>
+                            <div class="space-y-4">
+                                <div><h4 class="font-bold text-gray-700 mb-2">功能：</h4><ul class="list-disc list-inside space-y-1 text-gray-600">${voice.functions.map(f => `<li>${f}</li>`).join('')}</ul></div>
+                                <div><h4 class="font-bold text-gray-700 mb-2">範例：</h4><ul class="list-disc list-inside space-y-1 text-gray-600">${voice.examples.map(e => `<li>${e}</li>`).join('')}</ul></div>
+                            </div>
+                        `;
+                        contentPanel.style.opacity = 1;
+                    }, 200);
+                }
+                
+                function updateSectionTitle(moduleId) {
+                    const module = soundWaveData.modules.find(m => m.id === moduleId);
+                    if(module) voiceSectionTitle.textContent = module.name;
+                }
+
+                function initChart() {
+                    if (chart) chart.destroy();
+                    const ctx = root.querySelector('#voiceChart').getContext('2d');
+                    const voice = soundWaveData.voices.find(v => v.id === currentVoiceId);
+                    const module = soundWaveData.modules.find(m => m.id === voice.moduleId);
+                    chart = new Chart(ctx, {
+                        type: 'radar',
+                        data: {
+                            labels: Object.keys(voice.profile),
+                            datasets: [{
+                                label: voice.name,
+                                data: Object.values(voice.profile),
+                                backgroundColor: `${module.color}33`,
+                                borderColor: module.color,
+                                borderWidth: 2,
+                                pointBackgroundColor: module.color,
+                            }]
+                        },
+                        options: {
+                            maintainAspectRatio: false,
+                            scales: { r: { angleLines: { color: '#E5E7EB' }, grid: { color: '#F3F4F6' }, pointLabels: { font: { size: 14, family: "'Noto Sans TC', sans-serif" }, color: '#4B5563' }, ticks: { backdropColor: 'transparent', stepSize: 1, max: 5, min: 0 } } },
+                            plugins: { legend: { display: false } }
+                        }
+                    });
+                }
+                
+                function updateChart(voiceId) {
+                    const voice = soundWaveData.voices.find(v => v.id === voiceId);
+                    const module = soundWaveData.modules.find(m => m.id === voice.moduleId);
+                    if (!voice || !chart) return;
+                    chart.data.datasets[0].label = voice.name;
+                    chart.data.datasets[0].data = Object.values(voice.profile);
+                    chart.data.datasets[0].backgroundColor = `${module.color}33`;
+                    chart.data.datasets[0].borderColor = module.color;
+                    chart.data.datasets[0].pointBackgroundColor = module.color;
+                    chart.update();
+                }
+                
+                function handleModuleSelect(e) {
+                    const target = e.target.closest('.module-tab');
+                    if (!target) return;
+                    currentModuleId = target.dataset.id;
+                    currentVoiceId = soundWaveData.voices.find(v => v.moduleId === currentModuleId).id;
+                    renderModuleTabs();
+                    renderVoiceCards(currentModuleId);
+                    renderContent(currentVoiceId);
+                    updateChart(currentVoiceId);
+                    updateSectionTitle(currentModuleId);
+                }
+
+                function handleVoiceSelect(e) {
+                    const target = e.target.closest('.voice-card');
+                    if (!target) return;
+                    currentVoiceId = target.dataset.id;
+                    renderVoiceCards(currentModuleId);
+                    renderContent(currentVoiceId);
+                    updateChart(currentVoiceId);
+                }
+
+                moduleNav.addEventListener('click', handleModuleSelect);
+                voiceCardsContainer.addEventListener('click', handleVoiceSelect);
+                
+                renderModuleTabs();
+                renderVoiceCards(currentModuleId);
+                renderContent(currentVoiceId);
+                initChart();
+                updateSectionTitle(currentModuleId);
+            }
+
+
+            // --- Main Portal Logic ---
+
+            launchSoundwaveBtn.addEventListener('click', () => {
+                toolTitle.textContent = 'SoundWave 互動式探索工具';
+                toolContainer.innerHTML = soundwaveToolHTML;
+                mainPortal.style.display = 'none';
+                toolView.style.display = 'block';
+                window.scrollTo(0, 0);
+                initSoundWaveTool();
+            });
+
+            backToPortalBtn.addEventListener('click', () => {
+                mainPortal.style.display = 'block';
+                toolView.style.display = 'none';
+                toolContainer.innerHTML = '';
+                window.scrollTo(0, 0);
+            });
+
+        });
+    </script>
+</body>
+</html>
