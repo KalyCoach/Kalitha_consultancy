@@ -11,16 +11,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <!-- 
     Chosen Palette: Serene Professional (Light Gray background, Slate for text, with Teal as a primary accent)
-    Application Structure Plan: A single-page application (SPA) designed as a "Learning Portal". The initial view is a main hub with a hero section and a grid of "tool cards". Clicking a tool card (e.g., "SoundWave Explorer") dynamically hides the hub view and injects the selected tool's full HTML and initializes its specific JS logic into a dedicated container. A "back" button allows users to return to the main hub. This structure is highly scalable for future content (like the "RUL404" placeholder) and provides a seamless, professional user experience without page reloads, making it ideal for a cohesive teaching platform.
+    Application Structure Plan: A single-page application (SPA) designed as a "Learning Portal". The initial view is a main hub with a hero section and a grid of "tool cards". Clicking a tool card (e.g., "SoundWave Explorer", "Coach Talk Cards", "Interactive Quiz") dynamically hides the hub view and injects the selected tool's full HTML and initializes its specific JS logic into a dedicated container. A "back" button allows users to return to the main hub. This structure is highly scalable for future content and provides a seamless, professional user experience.
     Visualization & Content Choices: 
-    - Report Info: The entire "soundwave-interactive-explorer" artifact.
-    - Goal: Integrate a complete, pre-existing interactive application into a new, larger portal structure.
+    - Report Info: The original interactive card flipper, the SoundWave Explorer artifact, and a new quiz module.
+    - Goal: Integrate multiple, pre-existing and new interactive applications into a larger portal structure.
     - Viz/Presentation Method: 
         1. Main Portal: Card-based layout (HTML/Tailwind) to represent available tools.
         2. Tool Loading: A container div (`<div id="tool-container">`) is populated with the selected tool's HTML via a JavaScript template literal.
+        3. Quiz: A "flippable" card interface. Clicking the card toggles between question and answer views.
     - Interaction: Clicking a card triggers a view change. The JS logic for the loaded tool is then executed to make it interactive.
-    - Justification: This approach reuses existing complex interactive content within a new, scalable framework. It treats entire applications as "modules" that can be plugged into the main portal, which is a robust and user-friendly architecture for an expanding educational toolkit.
-    - Library/Method: Vanilla JS for view management and dynamic content injection. The embedded tool uses Chart.js as per its original design.
+    - Justification: This approach reuses existing complex interactive content while adding new, distinct modules within a scalable framework. The quiz reinforces learning through practical application.
+    - Library/Method: Vanilla JS for view management and dynamic content injection. The embedded tools use their original logic (Vanilla JS, Chart.js).
     CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
     -->
     <style>
@@ -38,6 +39,28 @@
         #tool-view {
             display: none;
         }
+        .quiz-card-flipper {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .is-flipped {
+            transform: rotateY(180deg);
+        }
+        .quiz-card-face {
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        .quiz-card-back {
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            transform: rotateY(180deg);
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
     </style>
 </head>
 <body class="text-slate-800">
@@ -53,11 +76,11 @@
 
         <main class="container mx-auto px-6 py-16">
             <h2 class="text-3xl font-bold text-center mb-12">可用工具</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
                 
                 <!-- SoundWave Tool Card -->
-                <div id="launch-soundwave" class="tool-card bg-white rounded-xl shadow-md overflow-hidden cursor-pointer">
-                    <div class="p-8">
+                <div id="launch-soundwave" class="tool-card bg-white rounded-xl shadow-md overflow-hidden cursor-pointer flex flex-col">
+                    <div class="p-8 flex-grow">
                         <div class="flex items-center mb-4">
                             <div class="p-3 rounded-full bg-teal-100 mr-4">
                                 <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.636 5.636a9 9 0 0112.728 0m-9.9-2.828a5 5 0 017.072 0"></path></svg>
@@ -65,24 +88,46 @@
                             <h3 class="text-2xl font-bold text-slate-900">SoundWave</h3>
                         </div>
                         <p class="text-slate-600">一個互動式探索工具，幫助您深入理解 SoundWave 溝通模型中的九種聲音與三大核心模組。</p>
-                        <button class="mt-6 w-full bg-teal-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors">
+                    </div>
+                    <div class="p-8 pt-0">
+                         <button class="mt-6 w-full bg-teal-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors">
                             啟動工具
                         </button>
                     </div>
                 </div>
-
-                <!-- RUL404 Placeholder Card -->
-                <div class="tool-card bg-white rounded-xl shadow-md overflow-hidden opacity-60">
-                     <div class="p-8">
+                
+                <!-- Coach Talk Card Tool -->
+                <div id="launch-coachtalk" class="tool-card bg-white rounded-xl shadow-md overflow-hidden cursor-pointer flex flex-col">
+                    <div class="p-8 flex-grow">
                         <div class="flex items-center mb-4">
-                            <div class="p-3 rounded-full bg-slate-100 mr-4">
-                                <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.546-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                           <div class="p-3 rounded-full bg-sky-100 mr-4">
+                                <svg class="w-6 h-6 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
                             </div>
-                            <h3 class="text-2xl font-bold text-slate-900">RUL404 模組</h3>
+                            <h3 class="text-2xl font-bold text-slate-900">教練對話卡片</h3>
                         </div>
-                        <p class="text-slate-500">更多精彩的互動學習工具正在開發中，將幫助您探索更多元的議題與知識領域。</p>
-                        <button class="mt-6 w-full bg-slate-300 text-slate-500 font-bold py-2 px-4 rounded-lg cursor-not-allowed">
-                            敬請期待
+                        <p class="text-slate-600">以卡片瀏覽的方式，快速學習 SoundWave 的核心模組、九種聲音，以及如何轉化限制性語言。</p>
+                    </div>
+                    <div class="p-8 pt-0">
+                         <button class="mt-6 w-full bg-sky-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-sky-700 transition-colors">
+                            啟動工具
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Interactive Quiz Tool Card -->
+                <div id="launch-quiz" class="tool-card bg-white rounded-xl shadow-md overflow-hidden cursor-pointer flex flex-col">
+                    <div class="p-8 flex-grow">
+                        <div class="flex items-center mb-4">
+                           <div class="p-3 rounded-full bg-amber-100 mr-4">
+                                <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                            </div>
+                            <h3 class="text-2xl font-bold text-slate-900">情境測驗</h3>
+                        </div>
+                        <p class="text-slate-600">透過職場實務案例，測驗您對九種聲音的應用能力，點擊題目卡片以顯示建議解答。</p>
+                    </div>
+                    <div class="p-8 pt-0">
+                         <button class="mt-6 w-full bg-amber-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-amber-600 transition-colors">
+                            啟動工具
                         </button>
                     </div>
                 </div>
@@ -96,7 +141,7 @@
         <nav class="bg-white shadow-sm sticky top-0 z-50">
             <div class="container mx-auto px-6 py-3 flex justify-between items-center">
                 <h2 id="tool-title" class="text-xl font-bold text-slate-800"></h2>
-                <button id="back-to-portal" class="bg-teal-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors">
+                <button id="back-to-portal" class="bg-gray-700 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-800 transition-colors">
                     返回主頁
                 </button>
             </div>
@@ -119,17 +164,67 @@
             const toolTitle = document.getElementById('tool-title');
 
             const launchSoundwaveBtn = document.getElementById('launch-soundwave');
+            const launchCoachTalkBtn = document.getElementById('launch-coachtalk');
+            const launchQuizBtn = document.getElementById('launch-quiz');
             const backToPortalBtn = document.getElementById('back-to-portal');
             
             // --- Templates for tools ---
 
+            const quizToolHTML = `
+                <div id="quiz-root" class="flex flex-col items-center justify-center min-h-[80vh] bg-gray-50 p-4 space-y-8 font-sans">
+                    <div class="text-center">
+                        <h1 class="text-3xl font-bold text-slate-800">9-Voice 應用情境測驗</h1>
+                        <p class="text-slate-500 mt-2">點擊下方的卡片來顯示/隱藏解答</p>
+                    </div>
+
+                    <div id="quiz-card-container" class="w-full max-w-2xl h-80" style="perspective: 1000px;">
+                        <div id="quiz-card-flipper" class="quiz-card-flipper w-full h-full relative cursor-pointer">
+                            <!-- Card Front (Question) -->
+                            <div id="quiz-card-front" class="quiz-card-face p-8 bg-white rounded-2xl shadow-xl border border-gray-200 flex flex-col justify-center"></div>
+                            <!-- Card Back (Answer) -->
+                            <div id="quiz-card-back" class="quiz-card-back p-8 bg-teal-50 rounded-2xl shadow-xl border border-teal-200 flex flex-col justify-center"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-6">
+                        <button id="prev-quiz" class="bg-gray-800 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700 inline-flex items-center disabled:opacity-50">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                            上一題
+                        </button>
+                        <span id="quiz-progress" class="text-sm font-medium text-gray-600 w-16 text-center"></span>
+                        <button id="next-quiz" class="bg-gray-800 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700 inline-flex items-center disabled:opacity-50">
+                            下一題
+                            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            const coachTalkCardToolHTML = `
+                <div id="coachtalk-root" class="flex flex-col items-center justify-center min-h-[80vh] bg-gray-50 p-4 space-y-6 font-sans">
+                    <div id="card-display" class="w-full max-w-lg text-left shadow-xl transition-all duration-300 ease-in-out bg-white rounded-2xl border border-gray-200">
+                        <div class="p-8">
+                            <h2 id="card-title" class="text-2xl font-bold mb-4 text-gray-800"></h2>
+                            <div id="card-content" class="whitespace-pre-wrap text-base text-gray-700 leading-relaxed"></div>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-6">
+                        <button id="prev-card" class="bg-gray-800 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700 inline-flex items-center">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                            上一張
+                        </button>
+                        <span id="card-progress" class="text-sm font-medium text-gray-600 w-16 text-center"></span>
+                        <button id="next-card" class="bg-gray-800 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700 inline-flex items-center">
+                            下一張
+                            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+
             const soundwaveToolHTML = `
                 <div id="soundwave-root" class="w-full h-full">
-                    <header class="text-center mb-10">
-                        <h1 class="text-4xl md:text-5xl font-bold text-gray-800">SoundWave 互動式探索工具</h1>
-                        <p class="mt-2 text-lg text-gray-500">以精湛的對話驅動影響力</p>
-                    </header>
-                    <main>
+                    <main class="container mx-auto py-10 px-4">
                         <div id="module-nav" class="flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-4 mb-8"></div>
                         <div class="lg:grid lg:grid-cols-12 lg:gap-8">
                             <div class="lg:col-span-4 mb-8 lg:mb-0">
@@ -151,12 +246,142 @@
                     </main>
                 </div>`;
             
+            function initQuizTool() {
+                const quizData = [
+                    {
+                        question: "情境：一位團隊成員連續兩次在專案報告中遲交他負責的部分，影響了團隊的整體進度。你作為專案經理，需要和他溝通。你首先會使用哪種聲音？",
+                        answer: {
+                            voice: "聲音：糾正 (Correct)",
+                            reason: "目標是維持團隊共同建立的標準與期望。使用『糾正』的聲音，直接且清晰地重申提交期限的規則，是管理界線並確保專案順利進行的第一步。"
+                        }
+                    },
+                    {
+                        question: "情境：在一次腦力激盪會議上，團隊提出的行銷點子都非常保守，與過去的作法大同小異。你希望激發團隊產生更具突破性的想法。你會使用哪種聲音？",
+                        answer: {
+                            voice: "聲音：挑戰 (Challenge)",
+                            reason: "『挑戰』的聲音旨在突破現狀、質疑假設。透過『我們為什麼不試試完全不同的方向？』或『如果預算不是問題，我們會怎麼做？』這類提問，可以有效打破思維框架，促進創新。"
+                        }
+                    },
+                    {
+                        question: "情境：一位新進員工看起來對分配給他的任務感到困惑，但他似乎不好意思開口求助。你想要了解他的狀況並提供協助。你會優先使用哪種聲音？",
+                        answer: {
+                            voice: "聲音：探詢 (Inquire)",
+                            reason: "使用『探詢』的聲音，帶著真誠的好奇心與開放性提問，例如『關於這個任務，目前你感覺如何？』，可以建立一個安全的對話環境，讓他願意分享困難點，而不是直接給予指導。"
+                        }
+                    },
+                    {
+                        question: "情境：你的同事向你展示一個他花了很多時間準備的提案。你看完後，覺得其中有些部分非常有潛力，但執行計畫卻存在明顯的風險。你會如何給予回饋？",
+                        answer: {
+                            voice: "聲音：評論 (Critique)",
+                            reason: "『評論』的聲音專長於平衡地評估利弊。你可以客觀地說：『這個提案的市場分析非常有見地（優點），同時，我們可能需要更深入地評估執行預算（缺點）。』這能提供建設性且全面的回饋。"
+                        }
+                    },
+                    {
+                        question: "情境：公司正在考慮是否要投入資源開發一項創新的綠能技術。你對此深具信心，並希望能說服高層支持這個決策。你會主要使用哪種聲音來表達？",
+                        answer: {
+                            voice: "聲音：倡導 (Advocate)",
+                            reason: "『倡導』的聲音是為了影響他人並引發行動。當你需要明確表達立場、訴諸情感與理智來爭取支持時，這是最強而有力的聲音。你需要充滿熱情地闡述這個決策的長遠價值與願景。"
+                        }
+                    }
+                ];
+
+                let currentQuizIndex = 0;
+                const flipper = document.getElementById('quiz-card-flipper');
+                const front = document.getElementById('quiz-card-front');
+                const back = document.getElementById('quiz-card-back');
+                const progress = document.getElementById('quiz-progress');
+                const prevBtn = document.getElementById('prev-quiz');
+                const nextBtn = document.getElementById('next-quiz');
+
+                function renderQuiz() {
+                    flipper.classList.remove('is-flipped');
+                    const item = quizData[currentQuizIndex];
+                    
+                    front.innerHTML = `<p class="text-xl text-slate-700 leading-relaxed">${item.question}</p>`;
+                    back.innerHTML = `
+                        <h4 class="text-xl font-bold text-teal-800 mb-3">${item.answer.voice}</h4>
+                        <p class="text-slate-700 leading-relaxed">${item.answer.reason}</p>
+                    `;
+                    progress.textContent = `第 ${currentQuizIndex + 1} / ${quizData.length} 題`;
+
+                    prevBtn.disabled = currentQuizIndex === 0;
+                    nextBtn.disabled = currentQuizIndex === quizData.length - 1;
+                }
+                
+                document.getElementById('quiz-card-container').addEventListener('click', () => {
+                    flipper.classList.toggle('is-flipped');
+                });
+
+                prevBtn.addEventListener('click', () => {
+                    if (currentQuizIndex > 0) {
+                        currentQuizIndex--;
+                        renderQuiz();
+                    }
+                });
+
+                nextBtn.addEventListener('click', () => {
+                    if (currentQuizIndex < quizData.length - 1) {
+                        currentQuizIndex++;
+                        renderQuiz();
+                    }
+                });
+                
+                renderQuiz();
+            }
+
+            function initCoachTalkCardTool() {
+                const cards = [
+                    { title: "核心模組：提問 (Ask)", content: "🔹目的：We ask to understand, engage and discover.\n（我們藉由提問來理解、投入與發現。）\n\n🔸包含聲音：探詢 (Inquire), 診斷 (Diagnose), 深究 (Probe)" },
+                    { title: "核心模組：提醒 (Tell)", content: "🔹目的：We tell to shape, instruct and disrupt.\n（我們藉由提醒來塑造、指導與突破。）\n\n🔸包含聲音：評論 (Critique), 糾正 (Correct), 挑戰 (Challenge)" },
+                    { title: "核心模組：提議 (Suggest)", content: "🔹目的：We suggest to influence, appeal and describe.\n（我們藉由提議來影響、吸引與描述。）\n\n🔸包含聲音：表述 (Articulate), 建議 (Advise), 倡導 (Advocate)" },
+                    { title: "聲音：探詢 Inquire", content: "🔹功能與應用：帶著好奇與開放的提問，建立關係與了解現況。適合在事情尚未明朗時使用。\n\n💬典型語句：關於這件事，可以多說一點你的想法嗎？\n💡建議提問：你對目前狀況的理解是什麼？" },
+                    { title: "聲音：診斷 Diagnose", content: "🔹功能與應用：運用邏輯與提問釐清原因與影響，有助於問題解決與系統性理解。\n\n💬典型語句：造成這個狀況的根本原因是什麼？\n💡建議提問：如果我們一步步回推，問題是從哪裡開始的？" },
+                    { title: "聲音：深究 Probe", content: "🔹功能與應用：追問隱藏資訊，針對模糊處深入挖掘，幫助更深入理解。\n\n💬典型語句：你提到...，這背後還有什麼我們沒看到的嗎？\n💡建議提問：關於這點，還有哪些細節很重要？" },
+                    { title: "聲音：表述 Articulate", content: "🔹功能與應用：清楚陳述、總結與闡述，創造中性平台促進共識與參與。\n\n💬典型語句：所以，我總結一下我們目前的共識是...。\n💡建議提問：我可以覆述一次我的理解，來確認我們有一致的看法嗎？" },
+                    { title: "聲音：建議 Advise", content: "🔹功能與應用：基於經驗提出建議與方向，適合提供支持與資訊。\n\n💬典型語句：根據我的經驗，我建議你可以...\n💡建議提問：我有些想法，你想聽聽看作為參考嗎？" },
+                    { title: "聲音：倡導 Advocate", content: "🔹功能與應用：明確表達立場與觀點，用來影響他人、引發行動。\n\n💬典型語句：我堅信，這對我們團隊是最好的方向。\n💡建議提問：我來說明為什麼這件事至關重要，好嗎？" },
+                    { title: "聲音：挑戰 Challenge", content: "🔹功能與應用：指出盲點與質疑假設，促進思辨與改變現狀。\n\n💬典型語句：我們是否想過，如果...會怎麼樣？\n💡建議提問：除了目前的方法，還有沒有更大膽的嘗試？" },
+                    { title: "聲音：糾正 Correct", content: "🔹功能與應用：清楚定義界線、規範與期望，協助維持標準與改進。\n\n💬典型語句：提醒一下，我們的會議原則是準時開始。\n💡建議提問：為了達成目標，我們需要共同遵守的規則是什麼？" },
+                    { title: "聲音：評論 Critique", content: "🔹功能與應用：平衡地評估利弊、優缺點，提升思考與決策品質。\n\n💬典型語句：這個做法的優點是...，但我們也要考慮到...。\n💡建議提問：讓我們一起來看看這個方案的正反兩面是什麼？" },
+                    { title: "限制語句：我根本沒辦法說服他。", content: "語言模式：一般化 + 無助感\n教練式提問：你過去有成功影響他的時候嗎？\n轉化句：我可以試幾種不同策略。" },
+                    { title: "限制語句：他們從來都不聽我說話。", content: "語言模式：極端化語言（從不）\n教練式提問：有沒有例外的時候？\n轉化句：我想找方法讓溝通更有效。" },
+                    { title: "限制語句：這就是規定，我不能改。", content: "語言模式：刪除主體\n教練式提問：誰訂的規定？你有什麼彈性？\n轉化句：我可以提出修改建議。" },
+                    { title: "限制語句：我不是那種有創意的人。", content: "語言模式：自我標籤\n教練式提問：你覺得創意的定義是什麼？\n轉化句：我可以培養創意思考的能力。" }
+                ];
+                let currentIndex = 0;
+                
+                const cardTitle = document.getElementById('card-title');
+                const cardContent = document.getElementById('card-content');
+                const cardProgress = document.getElementById('card-progress');
+                const prevBtn = document.getElementById('prev-card');
+                const nextBtn = document.getElementById('next-card');
+
+                function updateCard() {
+                    const card = cards[currentIndex];
+                    cardTitle.textContent = card.title;
+                    cardContent.textContent = card.content;
+                    cardProgress.textContent = `${currentIndex + 1} / ${cards.length}`;
+                }
+
+                prevBtn.addEventListener('click', () => {
+                    currentIndex = (currentIndex - 1 + cards.length) % cards.length;
+                    updateCard();
+                });
+
+                nextBtn.addEventListener('click', () => {
+                    currentIndex = (currentIndex + 1) % cards.length;
+                    updateCard();
+                });
+                
+                updateCard();
+            }
+
             function initSoundWaveTool() {
                 const soundWaveData = {
                     modules: [
-                        { id: 'ask', name: '提問 (Ask)', description: '為了去理解、投入與發現。', color: '#34D399' },
-                        { id: 'suggest', name: '提議 (Suggest)', description: '為了去影響、吸引與描述。', color: '#FBBF24' },
-                        { id: 'tell', name: '提醒 (Tell)', description: '為了去塑造、指導與突破。', color: '#60A5FA' },
+                        { id: 'ask', name: '提問 (Ask)', color: '#34D399' },
+                        { id: 'suggest', name: '提議 (Suggest)', color: '#FBBF24' },
+                        { id: 'tell', name: '提醒 (Tell)', color: '#60A5FA' },
                     ],
                     voices: [
                         { id: 'inquire', moduleId: 'ask', name: '探詢 (Inquire)', title: '給予關注的智慧', core: '探詢的智慧在於超越顯而易見的事物，提出開放性問題以持續探索。', functions: ['開啟對話', '引導對話走向理解', '建立連結'], examples: ['嗨，你好嗎？', '你的那個專案進行得如何？', '你認為你最好的選擇是什麼？'], profile: { '探索性': 5, '指導性': 1, '建設性': 4, '影響性': 2, '突破性': 1 } },
@@ -171,6 +396,7 @@
                     ]
                 };
                 const root = document.getElementById('soundwave-root');
+                if (!root) return;
                 const moduleNav = root.querySelector('#module-nav');
                 const voiceCardsContainer = root.querySelector('#voice-cards-container');
                 const contentPanel = root.querySelector('#content-panel');
@@ -181,9 +407,10 @@
                 let chart;
                 
                 function renderModuleTabs() {
-                    moduleNav.innerHTML = soundWaveData.modules.map(module => `
-                        <button data-id="${module.id}" class="module-tab w-full sm:w-auto text-lg font-bold py-3 px-6 rounded-lg transition-all ${module.id === currentModuleId ? `bg-[${module.color}] text-white` : 'bg-white hover:bg-gray-100'}">
-                            ${module.name}
+                    const module = soundWaveData.modules.find(m => m.id === currentModuleId);
+                    moduleNav.innerHTML = soundWaveData.modules.map(m => `
+                        <button data-id="${m.id}" class="module-tab w-full sm:w-auto text-lg font-bold py-3 px-6 rounded-lg transition-all ${m.id === currentModuleId ? 'text-white' : 'bg-white hover:bg-gray-100'}" style="${m.id === currentModuleId ? 'background-color:' + m.color : ''}">
+                            ${m.name}
                         </button>
                     `).join('');
                 }
@@ -192,7 +419,7 @@
                     const voices = soundWaveData.voices.filter(v => v.moduleId === moduleId);
                     const moduleColor = soundWaveData.modules.find(m => m.id === moduleId).color;
                     voiceCardsContainer.innerHTML = voices.map(voice => `
-                        <div data-id="${voice.id}" class="voice-card bg-white p-5 rounded-xl border-2 shadow-md cursor-pointer ${voice.id === currentVoiceId ? `border-[${moduleColor}]` : 'border-transparent'} hover:shadow-xl">
+                        <div data-id="${voice.id}" class="voice-card bg-white p-5 rounded-xl border-2 shadow-md cursor-pointer hover:shadow-xl" style="border-color:${voice.id === currentVoiceId ? moduleColor : 'transparent'}">
                             <h3 class="font-bold text-lg text-gray-800">${voice.name}</h3>
                             <p class="text-sm text-gray-500">${voice.title}</p>
                         </div>
@@ -202,7 +429,6 @@
                 function renderContent(voiceId) {
                     const voice = soundWaveData.voices.find(v => v.id === voiceId);
                     if (!voice) return;
-
                     contentPanel.style.opacity = 0;
                     setTimeout(() => {
                         contentPanel.innerHTML = `
@@ -225,10 +451,11 @@
 
                 function initChart() {
                     if (chart) chart.destroy();
-                    const ctx = root.querySelector('#voiceChart').getContext('2d');
+                    const ctx = root.querySelector('#voiceChart');
+                    if (!ctx) return;
                     const voice = soundWaveData.voices.find(v => v.id === currentVoiceId);
                     const module = soundWaveData.modules.find(m => m.id === voice.moduleId);
-                    chart = new Chart(ctx, {
+                    chart = new Chart(ctx.getContext('2d'), {
                         type: 'radar',
                         data: {
                             labels: Object.keys(voice.profile),
@@ -302,6 +529,24 @@
                 toolView.style.display = 'block';
                 window.scrollTo(0, 0);
                 initSoundWaveTool();
+            });
+            
+            launchCoachTalkBtn.addEventListener('click', () => {
+                toolTitle.textContent = '教練對話卡片';
+                toolContainer.innerHTML = coachTalkCardToolHTML;
+                mainPortal.style.display = 'none';
+                toolView.style.display = 'block';
+                window.scrollTo(0, 0);
+                initCoachTalkCardTool();
+            });
+
+            launchQuizBtn.addEventListener('click', () => {
+                toolTitle.textContent = '情境測驗';
+                toolContainer.innerHTML = quizToolHTML;
+                mainPortal.style.display = 'none';
+                toolView.style.display = 'block';
+                window.scrollTo(0, 0);
+                initQuizTool();
             });
 
             backToPortalBtn.addEventListener('click', () => {
